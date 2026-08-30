@@ -1,373 +1,653 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="mruby/edge - A pure-Rust reimplementation of the mruby VM for WebAssembly and embedded systems">
-    <meta name="keywords" content="mruby, ruby, rust, webassembly, wasm, embedded, edge computing">
-    <title>mruby/edge - Ruby for WebAssembly & Embedded Systems</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="mruby/edge is an mruby-compatible virtual machine built from scratch in Rust for small, portable WebAssembly applications.">
+    <meta name="keywords" content="mruby, Ruby, Rust, WebAssembly, Wasm, WASI, edge computing">
+    <meta name="theme-color" content="#17141f">
+    <title>mruby/edge — Ruby for the edges</title>
     <style>
+        :root {
+            --ink: #17141f;
+            --muted: #625d69;
+            --paper: #f8f5f0;
+            --card: #fffdf9;
+            --ruby: #dc2b3a;
+            --ruby-dark: #9e1625;
+            --rust: #c8582c;
+            --line: #ddd4c9;
+            --code: #211d29;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 92% 5%, rgba(220, 43, 58, 0.13), transparent 27rem),
+                radial-gradient(circle at 5% 34%, rgba(200, 88, 44, 0.1), transparent 25rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        a {
+            color: inherit;
         }
 
-        header {
-            text-align: center;
-            padding: 60px 20px 40px;
+        a:focus-visible {
+            outline: 3px solid var(--rust);
+            outline-offset: 4px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -5rem;
+            left: 1rem;
+            z-index: 10;
+            padding: 0.65rem 1rem;
             color: white;
+            background: var(--ink);
+            border-radius: 0.35rem;
+        }
+
+        .skip-link:focus {
+            top: 1rem;
+        }
+
+        .shell {
+            width: min(1120px, calc(100% - 2rem));
+            margin-inline: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            min-height: 5rem;
+        }
+
+        .wordmark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        .mark {
+            display: grid;
+            width: 2rem;
+            height: 2rem;
+            place-items: center;
+            color: white;
+            background: var(--ruby);
+            border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
+            box-shadow: 0.22rem 0.22rem 0 var(--ink);
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.4rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: var(--ruby-dark);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(17rem, 0.65fr);
+            gap: clamp(2rem, 7vw, 6rem);
+            align-items: center;
+            min-height: 34rem;
+            padding-block: 4rem 6.5rem;
+        }
+
+        .eyebrow {
+            margin: 0 0 1rem;
+            color: var(--ruby-dark);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
         }
 
         h1 {
-            font-size: 3.5em;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            max-width: 12ch;
+            margin-bottom: 1.5rem;
+            font-size: clamp(3.25rem, 9vw, 7rem);
+            line-height: 0.91;
+            letter-spacing: -0.075em;
         }
 
-        .tagline {
-            font-size: 1.5em;
-            margin-bottom: 30px;
-            opacity: 0.95;
+        h1 span {
+            color: var(--ruby);
         }
 
-        .badges {
+        .lede {
+            max-width: 42rem;
+            margin-bottom: 2rem;
+            color: #4d4854;
+            font-size: clamp(1.08rem, 2vw, 1.3rem);
+        }
+
+        .actions {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 0.75rem;
         }
 
-        .badge {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .cta-buttons {
-            display: flex;
+        .button {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 15px 35px;
+            min-height: 3rem;
+            padding: 0.75rem 1.15rem;
+            border: 2px solid var(--ink);
+            border-radius: 0.55rem;
+            font-weight: 800;
             text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            border: 2px solid white;
+            transition: transform 150ms ease, box-shadow 150ms ease;
         }
 
-        .btn-primary {
-            background: white;
-            color: #667eea;
+        .button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--ink);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-secondary {
-            background: transparent;
+        .button-primary {
             color: white;
+            background: var(--ink);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+        .button-secondary {
+            background: rgba(255, 253, 249, 0.7);
         }
 
-        main {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            margin-top: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        .terminal {
+            overflow: hidden;
+            color: #f8f3ed;
+            background: var(--code);
+            border: 2px solid var(--ink);
+            border-radius: 0.8rem;
+            box-shadow: 0.7rem 0.7rem 0 var(--ruby);
+            transform: rotate(1.5deg);
         }
 
-        h2 {
-            font-size: 2.2em;
-            margin-bottom: 30px;
-            color: #667eea;
-            text-align: center;
+        .terminal-bar {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.8rem 1rem;
+            background: #302a39;
         }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin: 50px 0;
+        .terminal-bar span {
+            width: 0.7rem;
+            height: 0.7rem;
+            background: #8f879a;
+            border-radius: 50%;
         }
 
-        .feature {
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .feature:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-        }
-
-        .feature-icon {
-            font-size: 2.5em;
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .feature p {
-            color: #666;
-            line-height: 1.8;
-        }
-
-        .code-section {
-            margin: 50px 0;
-        }
-
-        .code-section h3 {
-            font-size: 1.6em;
-            margin-bottom: 20px;
-            color: #333;
+        .terminal-bar span:first-child {
+            background: var(--ruby);
         }
 
         pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 25px;
-            border-radius: 10px;
+            margin: 0;
+            padding: 1.5rem;
             overflow-x: auto;
-            font-size: 0.95em;
-            line-height: 1.6;
-            margin: 20px 0;
+            font: 0.88rem/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         }
 
-        code {
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        .prompt {
+            color: #ff7f68;
         }
 
-        .use-cases {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            margin: 50px 0;
+        .output {
+            color: #c9c1d4;
         }
 
-        .use-cases h3 {
-            font-size: 1.8em;
-            margin-bottom: 25px;
-            text-align: center;
+        section {
+            padding-block: 5.5rem;
         }
 
-        .use-cases ul {
-            list-style: none;
+        .section-heading {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: minmax(0, 0.8fr) minmax(18rem, 1.2fr);
+            gap: 2rem;
+            align-items: end;
+            margin-bottom: 3rem;
         }
 
-        .use-cases li {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        h2 {
+            margin-bottom: 0;
+            font-size: clamp(2.2rem, 5vw, 4.25rem);
+            line-height: 1;
+            letter-spacing: -0.055em;
         }
 
-        .use-cases li::before {
-            content: "✓ ";
-            font-weight: bold;
-            margin-right: 8px;
+        .section-heading p {
+            max-width: 42rem;
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .feature {
+            min-height: 16rem;
+            padding: clamp(1.5rem, 4vw, 2.25rem);
+            background: rgba(255, 253, 249, 0.85);
+            border: 1px solid var(--line);
+            border-radius: 0.8rem;
+        }
+
+        .feature-number {
+            display: block;
+            margin-bottom: 2.5rem;
+            color: var(--ruby-dark);
+            font: 700 0.78rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.35rem;
+            line-height: 1.25;
+            letter-spacing: -0.025em;
+        }
+
+        .feature p,
+        .talk p {
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+
+        .feature code,
+        .note code {
+            padding: 0.08rem 0.3rem;
+            background: #eee7de;
+            border-radius: 0.25rem;
+            font-size: 0.88em;
+        }
+
+        .quickstart-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 0.7fr) minmax(20rem, 1.3fr);
+            gap: clamp(2rem, 7vw, 6rem);
+            align-items: center;
+        }
+
+        .quickstart-copy h2 {
+            margin-bottom: 1.25rem;
+        }
+
+        .quickstart-copy p {
+            color: var(--muted);
+        }
+
+        .note {
+            margin-top: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--ruby);
+            font-size: 0.92rem;
+        }
+
+        .talks {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .talk {
+            display: flex;
+            flex-direction: column;
+            min-height: 21rem;
+            padding: clamp(1.5rem, 4vw, 2.25rem);
+            color: white;
+            background: var(--ink);
+            border-radius: 0.8rem;
+        }
+
+        .talk:last-child {
+            background: var(--ruby-dark);
+        }
+
+        .talk .year {
+            margin-bottom: 3.5rem;
+            color: #ffb6ae;
+            font: 700 0.78rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .talk h3 {
+            max-width: 22ch;
+            font-size: clamp(1.65rem, 3vw, 2.35rem);
+        }
+
+        .talk p {
+            color: #ded7e5;
+        }
+
+        .talk:last-child p {
+            color: #f2dadd;
+        }
+
+        .talk-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin-top: auto;
+            padding-top: 2rem;
+        }
+
+        .talk-links a {
+            font-weight: 800;
+            text-underline-offset: 0.25rem;
+        }
+
+        .resources {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .resource {
+            padding: 1.25rem;
+            background: rgba(255, 253, 249, 0.85);
+            border: 1px solid var(--line);
+            border-radius: 0.55rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .resource:hover {
+            border-color: var(--ruby);
+            color: var(--ruby-dark);
         }
 
         footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: white;
-            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            padding-block: 2rem 3rem;
+            color: var(--muted);
+            border-top: 1px solid var(--line);
+            font-size: 0.85rem;
         }
 
-        footer a {
-            color: white;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            transition: border-color 0.3s ease;
+        footer p {
+            margin: 0;
         }
 
-        footer a:hover {
-            border-bottom-color: white;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5em;
+        @media (max-width: 760px) {
+            .nav-links li:not(:last-child) {
+                display: none;
             }
 
-            .tagline {
-                font-size: 1.2em;
-            }
-
-            main {
-                padding: 40px 20px;
-            }
-
-            .features {
+            .hero,
+            .section-heading,
+            .quickstart-wrap {
                 grid-template-columns: 1fr;
             }
 
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
+            .hero {
+                padding-block: 3rem 5rem;
             }
 
-            .btn {
-                width: 100%;
-                max-width: 300px;
-                text-align: center;
+            .terminal {
+                transform: none;
+            }
+
+            .feature-grid,
+            .talks {
+                grid-template-columns: 1fr;
+            }
+
+            .resources {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            footer {
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .button {
+                transition: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>mruby/edge</h1>
-            <p class="tagline">A pure-Rust reimplementation of the mruby VM<br>for WebAssembly and embedded systems</p>
-            
-            <div class="badges">
-                <span class="badge">🦀 Written in Rust</span>
-                <span class="badge">🌐 WebAssembly-first</span>
-                <span class="badge">⚡ Lightweight</span>
-                <span class="badge">🔒 Memory Safe</span>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <nav class="shell" aria-label="Primary navigation">
+        <a class="wordmark" href="#top" aria-label="mruby/edge home">
+            <span class="mark" aria-hidden="true">/</span>
+            mruby/edge
+        </a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#talks">Talks</a></li>
+            <li><a href="https://github.com/mrubyedge/mrubyedge">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero shell" id="top">
+        <div>
+            <p class="eyebrow">mruby-compatible · Pure Rust · Wasm-first</p>
+            <h1>Ruby for the <span>edges.</span></h1>
+            <p class="lede">
+                mruby/edge is a virtual machine built from scratch in Rust for WebAssembly.
+                It runs mruby bytecode in small, portable modules and embeds cleanly in Rust applications.
+            </p>
+            <div class="actions">
+                <a class="button button-primary" href="https://mrubyedge.github.io/playground/">Open playground</a>
+                <a class="button button-secondary" href="https://github.com/mrubyedge/mrubyedge">View source</a>
+            </div>
+        </div>
+
+        <div class="terminal" aria-label="Quick command-line example">
+            <div class="terminal-bar" aria-hidden="true"><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span></div>
+            <pre><code><span class="prompt">$</span> cargo install mrubyedge-cli
+
+<span class="prompt">$</span> mrbedge -e 'puts RUBY_ENGINE'
+<span class="output">mruby/edge</span>
+
+<span class="prompt">$</span> mrbedge app.rb
+<span class="prompt">$</span> mrbedge app.mrb</code></pre>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section class="shell" id="features">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Current runtime</p>
+                    <h2>Small core.<br>Useful boundaries.</h2>
+                </div>
+                <p>
+                    The VM focuses on the Ruby features needed to run real programs at the edge,
+                    while keeping WebAssembly host integration explicit.
+                </p>
             </div>
 
-            <div class="cta-buttons">
-                <a href="https://github.com/mrubyedge/mrubyedge" class="btn btn-primary" target="_blank">View on GitHub</a>
-                <a href="https://docs.rs/mrubyedge" class="btn btn-secondary" target="_blank">Documentation</a>
+            <div class="feature-grid">
+                <article class="feature">
+                    <span class="feature-number">01 / VM</span>
+                    <h3>mruby bytecode, rebuilt in Rust</h3>
+                    <p>
+                        The core VM loads <code>.mrb</code> bytecode. Its Ruby subset includes classes and modules,
+                        exceptions, blocks and closures, control flow, and keyword arguments.
+                    </p>
+                </article>
+
+                <article class="feature">
+                    <span class="feature-number">02 / WASM</span>
+                    <h3>WASI or host-defined WebAssembly</h3>
+                    <p>
+                        Build for <code>wasm32-wasip1</code>, or target <code>wasm32-unknown-unknown</code>
+                        with <code>--no-wasi</code>. Minimal builds can stay under 400 KiB.
+                    </p>
+                </article>
+
+                <article class="feature">
+                    <span class="feature-number">03 / ABI</span>
+                    <h3>Typed imports and exports with RBS</h3>
+                    <p>
+                        Sidecar <code>.import.rbs</code> and <code>.export.rbs</code> files connect Ruby methods
+                        to WebAssembly functions across the host boundary.
+                    </p>
+                </article>
+
+                <article class="feature">
+                    <span class="feature-number">04 / PROFILES</span>
+                    <h3>Only the features you need</h3>
+                    <p>
+                        Cargo flags add Regexp, Random, instruction limits, or FNV-backed hashes.
+                        <code>SharedMemory</code> provides direct access to Wasm linear memory.
+                    </p>
+                </article>
             </div>
-        </header>
+        </section>
 
-        <main>
-            <section>
-                <h2>Overview</h2>
-                <p style="text-align: center; font-size: 1.1em; color: #555; max-width: 800px; margin: 0 auto 40px;">
-                    mruby/edge is an mruby-compatible virtual machine implementation written in Rust, 
-                    specifically designed for WebAssembly environments and embedded systems. 
-                    Execute mruby bytecode and Ruby source code with minimal footprint and maximum safety.
+        <section class="shell" id="quickstart">
+            <div class="quickstart-wrap">
+                <div class="quickstart-copy">
+                    <p class="eyebrow">CLI workflow</p>
+                    <h2>From Ruby to Wasm.</h2>
+                    <p>
+                        <code>mrbedge</code> compiles Ruby source, runs source or precompiled bytecode,
+                        starts a REPL, and generates WebAssembly modules.
+                    </p>
+                    <p class="note">
+                        The core VM executes bytecode; source compilation is provided by the CLI.
+                        For the exact supported Ruby surface, see the compatibility coverage.
+                    </p>
+                    <div class="actions">
+                        <a class="button button-secondary" href="https://github.com/mrubyedge/mrubyedge/blob/master/mrubyedge/COVERAGE.md">Compatibility coverage</a>
+                    </div>
+                </div>
+
+                <div class="terminal" aria-label="WebAssembly build example">
+                    <div class="terminal-bar" aria-hidden="true"><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span></div>
+                    <pre><code><span class="output"># app.rb</span>
+def add(a, b)
+  a + b
+end
+
+<span class="output"># app.export.rbs</span>
+def add: (Integer, Integer) -&gt; Integer
+
+<span class="prompt">$</span> mrbedge wasm app.rb -o app.wasm
+<span class="output">[ok] wasm file is generated: app.wasm</span></code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="shell" id="talks">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">On stage</p>
+                    <h2>Two chapters<br>of mruby/edge.</h2>
+                </div>
+                <p>
+                    From building a new mruby-family VM for Wasm to deploying Ruby applications
+                    across edge platforms with Uzumibi.
                 </p>
-            </section>
+            </div>
 
-            <section class="features">
-                <div class="feature">
-                    <div class="feature-icon">🌐</div>
-                    <h3>WebAssembly-first Design</h3>
-                    <p>Optimized for running Ruby code in browsers and edge computing environments. Deploy Ruby applications anywhere WebAssembly runs.</p>
+            <div class="talks">
+                <article class="talk">
+                    <p class="year">RubyKaigi 2024</p>
+                    <h3>An mruby for WebAssembly</h3>
+                    <p>
+                        Why mruby/edge began, how its bytecode VM works, and how Ruby methods become
+                        WebAssembly exports—plus the project’s early Component Model ambitions.
+                    </p>
+                    <div class="talk-links">
+                        <a href="https://rubykaigi.org/2024/presentations/udzura.html">Talk details</a>
+                        <a href="https://udzura.jp/slides/2024/rubykaigi/">Slides</a>
+                        <a href="https://www.youtube.com/watch?v=FyomdDn9eGo">Video</a>
+                    </div>
+                </article>
+
+                <article class="talk">
+                    <p class="year">RubyKaigi 2026</p>
+                    <h3>Uzumibi: Reinventing mruby for the Edges</h3>
+                    <p>
+                        The evolved VM—OOP, exceptions, closures, keyword arguments, and feature flags—
+                        meets Uzumibi, a lightweight framework for portable Ruby edge applications.
+                    </p>
+                    <div class="talk-links">
+                        <a href="https://rubykaigi.org/2026/presentations/udzura.html">Talk details</a>
+                        <a href="https://udzura.jp/slides/2026/rubykaigi/">Slides</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="shell" id="resources">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Dive deeper</p>
+                    <h2>Project resources.</h2>
                 </div>
-                <div class="feature">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Lightweight Runtime</h3>
-                    <p>Minimal footprint and binary size suitable for constrained environments. Perfect for resource-limited devices and applications.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔧</div>
-                    <h3>no_std Core</h3>
-                    <p>Can run in environments without standard library support. Ideal for bare-metal and embedded systems programming.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔄</div>
-                    <h3>mruby Compatible</h3>
-                    <p>Executes mruby bytecode (.mrb files) and Ruby source code. Leverage existing mruby tools and libraries.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🦀</div>
-                    <h3>Rust Safety</h3>
-                    <p>Built with Rust for memory safety and reliability. Eliminate entire classes of bugs and security vulnerabilities.</p>
-                </div>
-            </section>
+                <p>Source, API references, published crates, and a browser playground.</p>
+            </div>
+            <div class="resources">
+                <a class="resource" href="https://github.com/mrubyedge/mrubyedge">GitHub ↗</a>
+                <a class="resource" href="https://docs.rs/mrubyedge">Core API ↗</a>
+                <a class="resource" href="https://crates.io/crates/mrubyedge-cli">CLI crate ↗</a>
+                <a class="resource" href="https://mrubyedge.github.io/playground/">Playground ↗</a>
+            </div>
+        </section>
+    </main>
 
-            <section class="code-section">
-                <h2>Quick Start</h2>
-                
-                <h3>Installation</h3>
-                <p>Add this to your <code>Cargo.toml</code>:</p>
-                <pre><code>[dependencies]
-mrubyedge = "1.0"</code></pre>
-
-                <h3>Running Precompiled Bytecode</h3>
-                <p>Load and execute a precompiled <code>*.mrb</code> file:</p>
-                <pre><code>use mrubyedge::rite;
-use mrubyedge::yamrb::vm;
-
-// Bundle the compiled script at build time
-const SCRIPT: &[u8] = include_bytes!("./examples/simple.mrb");
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut rite = rite::load(SCRIPT)?;
-    let mut vm = vm::VM::open(&mut rite);
-    let value = vm.run()?;
-    println!("{:?}", value);
-    Ok(())
-}</code></pre>
-            </section>
-
-            <section class="use-cases">
-                <h3>Use Cases</h3>
-                <ul>
-                    <li><strong>Embedded Systems</strong> - Run Ruby in resource-constrained devices</li>
-                    <li><strong>WebAssembly Applications</strong> - Deploy Ruby code in browsers and serverless environments</li>
-                    <li><strong>Edge Computing</strong> - Lightweight Ruby runtime for edge nodes</li>
-                    <li><strong>Rust Integration</strong> - Embed Ruby scripting in Rust applications</li>
-                </ul>
-            </section>
-
-            <section style="text-align: center; margin-top: 60px;">
-                <h2>Get Started Today</h2>
-                <p style="font-size: 1.1em; color: #666; margin: 20px 0 30px;">
-                    Check out the documentation and start building with mruby/edge
-                </p>
-                <div class="cta-buttons">
-                    <a href="https://github.com/mrubyedge/mrubyedge" class="btn btn-primary" target="_blank">GitHub Repository</a>
-                    <a href="https://docs.rs/mrubyedge" class="btn btn-secondary" target="_blank" style="color: #667eea; border-color: #667eea;">API Docs</a>
-                    <a href="https://crates.io/crates/mrubyedge" class="btn btn-secondary" target="_blank" style="color: #667eea; border-color: #667eea;">Crates.io</a>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p>&copy; 2026 mruby/edge Project. Licensed under the terms found in the <a href="https://github.com/mrubyedge/mrubyedge/blob/master/LICENSE" target="_blank">LICENSE</a> file.</p>
-        </footer>
-    </div>
+    <footer class="shell">
+        <p>© 2026 mruby/edge project</p>
+        <p><a href="https://github.com/mrubyedge/mrubyedge/blob/master/LICENSE">BSD 3-Clause License</a></p>
+    </footer>
 </body>
 </html>

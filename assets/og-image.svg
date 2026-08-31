@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">mruby/edge — Ruby for the edges</title>
+  <desc id="description">Social preview for mruby/edge, an mruby-compatible virtual machine built in Rust for WebAssembly.</desc>
+
+  <defs>
+    <radialGradient id="ruby-glow" cx="100%" cy="0%" r="75%">
+      <stop offset="0%" stop-color="#dc2b3a" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#dc2b3a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rust-glow" cx="0%" cy="100%" r="65%">
+      <stop offset="0%" stop-color="#c8582c" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#c8582c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#f8f5f0"/>
+  <rect width="1200" height="630" fill="url(#ruby-glow)"/>
+  <rect width="1200" height="630" fill="url(#rust-glow)"/>
+
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="92" y="104" fill="#9e1625" font-size="20" font-weight="700" letter-spacing="3">MRUBY-COMPATIBLE · PURE RUST · WASM-FIRST</text>
+
+    <text x="86" y="248" fill="#17141f" font-size="92" font-weight="700" letter-spacing="-5">Ruby for the</text>
+    <text x="86" y="348" fill="#dc2b3a" font-size="92" font-weight="700" letter-spacing="-5">edges.</text>
+
+    <text x="92" y="422" fill="#4d4854" font-size="24"><tspan fill="#17141f" font-weight="700">mruby/edge</tspan><tspan> is an mruby-compatible VM</tspan></text>
+    <text x="92" y="456" fill="#4d4854" font-size="24">built from scratch in Rust for small, portable</text>
+    <text x="92" y="490" fill="#4d4854" font-size="24">WebAssembly applications.</text>
+
+    <text x="92" y="557" fill="#17141f" font-size="22" font-weight="700">mrubyedge.github.io</text>
+  </g>
+
+  <g transform="translate(828 156) scale(4.6)">
+    <path
+      fill="#17141f"
+      d="M21 10h26c6.1 0 11 4.9 11 11v26c0 6.1-4.9 11-11 11H13c-1.7 0-3-1.3-3-3V21c0-6.1 4.9-11 11-11Z"
+    />
+    <path
+      fill="#dc2b3a"
+      d="M15 4h26c6.1 0 11 4.9 11 11v26c0 6.1-4.9 11-11 11H7c-1.7 0-3-1.3-3-3V15C4 8.9 8.9 4 15 4Z"
+    />
+    <path fill="#ffffff" d="M29.5 18h5.5l-4.6 24h-5.5Z"/>
+  </g>
+</svg>
